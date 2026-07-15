@@ -184,20 +184,27 @@ class NotepadApp:
         current_perf = time.perf_counter()
         if self.last_keypress_time is not None:
             latency_ms = (current_perf - self.last_keypress_time) * 1000
-            latency_str = f"+{int(latency_ms)}ms"
-            # Update stats
-            self.total_latency += latency_ms
-            self.latency_count += 1
-            avg_latency = self.total_latency / self.latency_count
-            self.lbl_lat_val.config(text=f"{int(avg_latency)} ms")
             
-            # Change color of average latency indicator based on speed
-            if avg_latency < 250:
-                self.lbl_lat_val.config(foreground=ACCENT_GREEN)
-            elif avg_latency < 600:
-                self.lbl_lat_val.config(foreground=ACCENT_YELLOW)
+            # If latency is 1.5 seconds (1500 ms) or more, clear the log first
+            if latency_ms >= 1500:
+                self.clear_log()
+                latency_ms = None
+                latency_str = "First"
             else:
-                self.lbl_lat_val.config(foreground=ACCENT_RED)
+                latency_str = f"+{int(latency_ms)}ms"
+                # Update stats
+                self.total_latency += latency_ms
+                self.latency_count += 1
+                avg_latency = self.total_latency / self.latency_count
+                self.lbl_lat_val.config(text=f"{int(avg_latency)} ms")
+                
+                # Change color of average latency indicator based on speed
+                if avg_latency < 250:
+                    self.lbl_lat_val.config(foreground=ACCENT_GREEN)
+                elif avg_latency < 600:
+                    self.lbl_lat_val.config(foreground=ACCENT_YELLOW)
+                else:
+                    self.lbl_lat_val.config(foreground=ACCENT_RED)
         else:
             latency_ms = None
             latency_str = "First"
