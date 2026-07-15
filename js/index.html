@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Key-Speed Notepad Logger</title>
+  <meta name="description" content="A premium keystroke speed tracker and notepad logger with millisecond precision statistics.">
+  <!-- Google Fonts: Inter for UI, Fira Code for Editor/Logs -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="logo-area">
+        <svg class="app-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <path d="M16 13H8"/>
+          <path d="M16 17H8"/>
+          <path d="M10 9H8"/>
+        </svg>
+        <h1>Key-Speed Notepad</h1>
+      </div>
+      <div class="app-subtitle">Logger & Latency Analyzer</div>
+    </header>
+
+    <main class="main-content">
+      <!-- Left Panel: Notepad Editor -->
+      <section class="panel-left" aria-label="Notepad Editor Panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="status-dot"></span>
+            <h2>Notepad Editor</h2>
+          </div>
+        </div>
+        <div class="editor-container">
+          <textarea 
+            id="editor" 
+            placeholder="Start typing here..." 
+            spellcheck="false" 
+            autocomplete="off"
+            autofocus
+          ></textarea>
+        </div>
+        <div class="panel-footer" id="editor-footer">
+          <div class="counter-display" id="char-word-count">Chars: 0 | Words: 0</div>
+        </div>
+      </section>
+
+      <!-- Right Panel: Logs & Stats -->
+      <section class="panel-right" aria-label="Keystroke Logger and Statistics Panel">
+        <!-- Stats Dashboard -->
+        <div class="stats-dashboard">
+          <div class="stat-card" id="stat-keys">
+            <span class="stat-title">KEYS TYPED</span>
+            <span class="stat-value" id="keys-count-val">0</span>
+          </div>
+          <div class="stat-card" id="stat-latency">
+            <span class="stat-title">AVG LATENCY</span>
+            <span class="stat-value speed-green" id="avg-latency-val">0 ms</span>
+          </div>
+        </div>
+
+        <!-- Log Display Panel -->
+        <div class="log-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg class="terminal-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="4 17 10 11 4 5"/>
+                <line x1="12" y1="19" x2="20" y2="19"/>
+              </svg>
+              <h2>Keystroke Log <span class="header-desc">(Millisecond Precision)</span></h2>
+            </div>
+          </div>
+          <div class="log-display-container">
+            <div id="log-display" class="log-display-terminal"></div>
+          </div>
+          <div class="panel-footer controls-footer">
+            <button id="btn-clear" class="btn btn-secondary">CLEAR LOG</button>
+            <button id="btn-export" class="btn btn-primary">EXPORT CSV</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
