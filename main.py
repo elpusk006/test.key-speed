@@ -286,6 +286,10 @@ class NotepadApp:
         
         self.lbl_keys_val.config(text="0")
         self.lbl_lat_val.config(text="0 ms", foreground=ACCENT_GREEN)
+        
+        # Set focus back to the notepad editor automatically
+        self.editor.focus_set()
+
 
     def export_csv(self):
         if not self.logs:
