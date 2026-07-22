@@ -211,8 +211,11 @@ impl eframe::App for KeySpeedApp {
             }
         });
 
-        for key_name in key_events_to_record {
-            self.record_keypress(key_name);
+        if !key_events_to_record.is_empty() {
+            for key_name in key_events_to_record {
+                self.record_keypress(key_name);
+            }
+            ctx.request_repaint();
         }
 
         // Top Header Banner (showing platform OS target)
@@ -310,58 +313,57 @@ impl eframe::App for KeySpeedApp {
 
                     ui.add_space(4.0);
 
-                    // Keystroke Log Scroll Area
+                    // Keystroke Log Scroll Area (Virtualize rows with show_rows for O(1) render performance)
                     let scroll_height = ui.available_height() - 60.0;
+                    let row_height = 22.0;
+                    let total_rows = self.logs.len();
+
                     ScrollArea::vertical()
                         .max_height(scroll_height)
                         .stick_to_bottom(true)
-                        .show(ui, |ui| {
-                            ui.add_space(4.0);
-                            for entry in &self.logs {
-                                ui.horizontal(|ui| {
-                                    ui.add_space(8.0);
-                                    // Timestamp
-                                    ui.label(
-                                        RichText::new(format!("[{}]", entry.timestamp))
-                                            .font(FontId::monospace(11.0))
-                                            .color(ACCENT_BLUE),
-                                    );
-                                    // Key label & name
-                                    ui.label(
-                                        RichText::new("Key:")
-                                            .font(FontId::monospace(11.0))
-                                            .color(FG_MUTED),
-                                    );
-                                    ui.label(
-                                        RichText::new(format!("{:10}", entry.key))
-                                            .font(FontId::monospace(11.0))
-                                            .strong()
-                                            .color(ACCENT_ORANGE),
-                                    );
-                                    // Interval label & latency
-                                    ui.label(
-                                        RichText::new("Interval:")
-                                            .font(FontId::monospace(11.0))
-                                            .color(FG_MUTED),
-                                    );
-                                    let lat_color = match entry.latency_ms {
-                                        Some(ms) if ms < 250 => ACCENT_GREEN,
-                                        Some(ms) if ms < 600 => ACCENT_YELLOW,
-                                        Some(_) => ACCENT_RED,
-                                        None => FG_MUTED,
-                                    };
-                                    ui.label(
-                                        RichText::new(&entry.latency_str)
-                                            .font(FontId::monospace(11.0))
-                                            .strong()
-                                            .color(lat_color),
-                                    );
-                                });
-                            }
-
-                            if self.scroll_to_bottom {
-                                ui.scroll_to_cursor(Some(egui::Align::BOTTOM));
-                                self.scroll_to_bottom = false;
+                        .show_rows(ui, row_height, total_rows, |ui, row_range| {
+                            for idx in row_range {
+                                if let Some(entry) = self.logs.get(idx) {
+                                    ui.horizontal(|ui| {
+                                        ui.add_space(8.0);
+                                        // Timestamp
+                                        ui.label(
+                                            RichText::new(format!("[{}]", entry.timestamp))
+                                                .font(FontId::monospace(11.0))
+                                                .color(ACCENT_BLUE),
+                                        );
+                                        // Key label & name
+                                        ui.label(
+                                            RichText::new("Key:")
+                                                .font(FontId::monospace(11.0))
+                                                .color(FG_MUTED),
+                                        );
+                                        ui.label(
+                                            RichText::new(format!("{:10}", entry.key))
+                                                .font(FontId::monospace(11.0))
+                                                .strong()
+                                                .color(ACCENT_ORANGE),
+                                        );
+                                        // Interval label & latency
+                                        ui.label(
+                                            RichText::new("Interval:")
+                                                .font(FontId::monospace(11.0))
+                                                .color(FG_MUTED),
+                                        );
+                                        let lat_color = match entry.latency_ms {
+                                            Some(ms) if ms < 250 => ACCENT_GREEN,
+                                            Some(ms) if ms < 600 => ACCENT_YELLOW,
+                                            Some(_) => ACCENT_RED,
+                                            None => FG_MUTED,
+                                        };
+                                        ui.label(
+                                            RichText::new(&entry.latency_str)
+                                                .font(FontId::monospace(11.0))
+                                                .strong()
+                                                .color(lat_color),
+                                        );
+                                    });
+                                }
                             }
                         });
 
