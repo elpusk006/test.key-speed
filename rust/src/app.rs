@@ -37,6 +37,7 @@ pub struct KeySpeedApp {
     
     // UI state
     scroll_to_bottom: bool,
+    request_focus_editor: bool,
     status_message: Option<(String, Instant)>,
 }
 
@@ -50,6 +51,7 @@ impl Default for KeySpeedApp {
             total_latency_ms: 0.0,
             latency_count: 0,
             scroll_to_bottom: false,
+            request_focus_editor: true,
             status_message: None,
         }
     }
@@ -84,6 +86,13 @@ impl KeySpeedApp {
         self.total_latency_ms = 0.0;
         self.latency_count = 0;
         self.last_keypress_time = None;
+    }
+
+    /// Clear both the editor text and the keystroke log
+    pub fn clear_all(&mut self) {
+        self.editor_text.clear();
+        self.clear_log();
+        self.request_focus_editor = true;
     }
 
     /// Records a key press with millisecond latency calculations
@@ -366,7 +375,7 @@ impl eframe::App for KeySpeedApp {
                                 if ui.add(egui::Button::new(
                                     RichText::new("CLEAR LOG").strong().color(FG_LIGHT),
                                 )).clicked() {
-                                    self.clear_log();
+                                    self.clear_all();
                                 }
 
                                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
@@ -425,7 +434,7 @@ impl eframe::App for KeySpeedApp {
                     ui.horizontal(|ui| {
                         ui.add_space(editor_margin);
                         let available_size = ui.available_size() - egui::vec2(editor_margin, 0.0);
-                        ui.add_sized(
+                        let editor_response = ui.add_sized(
                             available_size,
                             egui::TextEdit::multiline(&mut self.editor_text)
                                 .font(FontId::monospace(14.0))
@@ -433,6 +442,11 @@ impl eframe::App for KeySpeedApp {
                                 .desired_width(f32::INFINITY)
                                 .hint_text("Start typing here... Keystroke speeds will be recorded in real-time."),
                         );
+
+                        if self.request_focus_editor {
+                            editor_response.request_focus();
+                            self.request_focus_editor = false;
+                        }
                     });
                 });
             });

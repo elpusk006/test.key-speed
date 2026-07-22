@@ -169,7 +169,7 @@ class NotepadApp:
         self.log_controls.pack(fill=tk.X, side=tk.BOTTOM)
         self.log_controls.pack_propagate(False)
         
-        self.btn_clear = ttk.Button(self.log_controls, text="CLEAR LOG", style='Action.TButton', command=self.clear_log)
+        self.btn_clear = ttk.Button(self.log_controls, text="CLEAR LOG", style='Action.TButton', command=self.clear_all)
         self.btn_clear.pack(side=tk.LEFT, padx=15, pady=10)
         
         self.btn_export = ttk.Button(self.log_controls, text="EXPORT CSV", style='Action.TButton', command=self.export_csv)
@@ -278,6 +278,15 @@ class NotepadApp:
         chars = len(content)
         words = len(content.split())
         self.char_count_lbl.config(text=f"Chars: {chars} | Words: {words}")
+
+    def clear_all(self):
+        # Clear left editor screen
+        self.editor.delete("1.0", tk.END)
+        self.update_counts()
+        
+        # Clear log panel and statistics
+        self.clear_log()
+        self.editor.focus_set()
 
     def clear_log(self):
         self.log_display.config(state=tk.NORMAL)

@@ -181,6 +181,14 @@ function clearLog() {
   editor.focus();
 }
 
+// Clear both left editor screen and keystroke log
+function clearAll() {
+  editor.value = "";
+  updateCounts();
+  clearLog();
+  editor.focus();
+}
+
 // Export statistics log to a CSV spreadsheet file
 function exportCSV() {
   if (logs.length === 0) {
@@ -213,7 +221,7 @@ function exportCSV() {
 // Bind event listeners
 editor.addEventListener("keydown", onKeyPress);
 editor.addEventListener("keyup", updateCounts);
-btnClear.addEventListener("click", clearLog);
+btnClear.addEventListener("click", clearAll);
 btnExport.addEventListener("click", exportCSV);
 
 // Autofocus on load
