@@ -1,0 +1,12 @@
+[package]
+name = "key_speed_logger"
+version = "0.1.0"
+edition = "2021"
+authors = ["Key-Speed Logger Developer"]
+description = "Cross-platform Key-Speed Notepad Logger for Windows and Linux"
+
+[dependencies]
+eframe = "0.28"
+chrono = "0.4"
+rfd = "0.14"
+csv = "1.3"
