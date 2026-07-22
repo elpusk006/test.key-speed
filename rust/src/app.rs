@@ -172,37 +172,53 @@ impl eframe::App for KeySpeedApp {
         visuals.window_fill = BG_DARK;
         ctx.set_visuals(visuals);
 
-        // Process raw input events to capture precise keystroke events
+        enum TextOp {
+            Push(char),
+            Pop,
+            Str(&'static str),
+        }
+
         let mut key_events_to_record = Vec::new();
+        let mut text_updates = Vec::new();
+
         ctx.input(|i| {
             for event in &i.raw.events {
                 match event {
                     egui::Event::Key { key, pressed: true, .. } => {
-                        let key_str = match key {
-                            egui::Key::Space => Some("Space".to_string()),
-                            egui::Key::Enter => Some("Enter".to_string()),
-                            egui::Key::Backspace => Some("Backspace".to_string()),
-                            egui::Key::Tab => Some("Tab".to_string()),
-                            egui::Key::Escape => Some("<Escape>".to_string()),
-                            egui::Key::Delete => Some("<Delete>".to_string()),
-                            egui::Key::ArrowUp => Some("<Up>".to_string()),
-                            egui::Key::ArrowDown => Some("<Down>".to_string()),
-                            egui::Key::ArrowLeft => Some("<Left>".to_string()),
-                            egui::Key::ArrowRight => Some("<Right>".to_string()),
-                            _ => None, // Alphabetical / symbol keys are handled by Event::Text
-                        };
-                        if let Some(name) = key_str {
-                            key_events_to_record.push(name);
+                        match key {
+                            egui::Key::Space => {
+                                key_events_to_record.push("Space".to_string());
+                                text_updates.push(TextOp::Push(' '));
+                            }
+                            egui::Key::Enter => {
+                                key_events_to_record.push("Enter".to_string());
+                                text_updates.push(TextOp::Push('\n'));
+                            }
+                            egui::Key::Backspace => {
+                                key_events_to_record.push("Backspace".to_string());
+                                text_updates.push(TextOp::Pop);
+                            }
+                            egui::Key::Tab => {
+                                key_events_to_record.push("Tab".to_string());
+                                text_updates.push(TextOp::Str("    "));
+                            }
+                            egui::Key::Escape => key_events_to_record.push("<Escape>".to_string()),
+                            egui::Key::Delete => key_events_to_record.push("<Delete>".to_string()),
+                            egui::Key::ArrowUp => key_events_to_record.push("<Up>".to_string()),
+                            egui::Key::ArrowDown => key_events_to_record.push("<Down>".to_string()),
+                            egui::Key::ArrowLeft => key_events_to_record.push("<Left>".to_string()),
+                            egui::Key::ArrowRight => key_events_to_record.push("<Right>".to_string()),
+                            _ => {}
                         }
                     }
                     egui::Event::Text(text) => {
                         for ch in text.chars() {
                             if ch == ' ' {
-                                // Handled in Key::Space above if triggered
                                 continue;
                             }
                             if ch.is_ascii_graphic() || !ch.is_control() {
                                 key_events_to_record.push(format!("'{}'", ch));
+                                text_updates.push(TextOp::Push(ch));
                             }
                         }
                     }
@@ -214,6 +230,15 @@ impl eframe::App for KeySpeedApp {
         if !key_events_to_record.is_empty() {
             for key_name in key_events_to_record {
                 self.record_keypress(key_name);
+            }
+            for op in text_updates {
+                match op {
+                    TextOp::Push(ch) => self.editor_text.push(ch),
+                    TextOp::Pop => {
+                        self.editor_text.pop();
+                    }
+                    TextOp::Str(s) => self.editor_text.push_str(s),
+                }
             }
             ctx.request_repaint();
         }
@@ -430,25 +455,22 @@ impl eframe::App for KeySpeedApp {
                             });
                         });
 
-                    // Multi-line Text Editor
+                    // Full-capacity Multiline Editor View (Non-clipping, zero-lag stream)
                     let editor_margin = 10.0;
                     ui.add_space(editor_margin);
                     ui.horizontal(|ui| {
                         ui.add_space(editor_margin);
                         let available_size = ui.available_size() - egui::vec2(editor_margin, 0.0);
-                        let editor_response = ui.add_sized(
+
+                        ui.add_sized(
                             available_size,
                             egui::TextEdit::multiline(&mut self.editor_text)
                                 .font(FontId::monospace(14.0))
                                 .text_color(FG_LIGHT)
                                 .desired_width(f32::INFINITY)
+                                .interactive(false)
                                 .hint_text("Start typing here... Keystroke speeds will be recorded in real-time."),
                         );
-
-                        if self.request_focus_editor {
-                            editor_response.request_focus();
-                            self.request_focus_editor = false;
-                        }
                     });
                 });
             });
