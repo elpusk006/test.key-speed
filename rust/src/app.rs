@@ -423,7 +423,7 @@ impl eframe::App for KeySpeedApp {
             .frame(egui::Frame::none().fill(BG_DARK))
             .show(ctx, |ui| {
                 ui.vertical(|ui| {
-                    // Editor Status Bar at bottom
+                    // Editor Status Bar at bottom — must be declared first
                     egui::TopBottomPanel::bottom("editor_status")
                         .exact_height(28.0)
                         .frame(egui::Frame::none().fill(BG_HEADER))
@@ -455,23 +455,23 @@ impl eframe::App for KeySpeedApp {
                             });
                         });
 
-                    // Full-capacity Multiline Editor View (Non-clipping, zero-lag stream)
-                    let editor_margin = 10.0;
-                    ui.add_space(editor_margin);
-                    ui.horizontal(|ui| {
-                        ui.add_space(editor_margin);
-                        let available_size = ui.available_size() - egui::vec2(editor_margin, 0.0);
-
-                        ui.add_sized(
-                            available_size,
-                            egui::TextEdit::multiline(&mut self.editor_text)
-                                .font(FontId::monospace(14.0))
-                                .text_color(FG_LIGHT)
-                                .desired_width(f32::INFINITY)
-                                .interactive(false)
-                                .hint_text("Start typing here... Keystroke speeds will be recorded in real-time."),
-                        );
-                    });
+                    // Editor area fills remaining space with vertical scroll
+                    ScrollArea::vertical()
+                        .stick_to_bottom(true)
+                        .auto_shrink(false)
+                        .show(ui, |ui| {
+                            let available_width = ui.available_width();
+                            let available_height = ui.available_height();
+                            ui.add_sized(
+                                egui::vec2(available_width, available_height),
+                                egui::TextEdit::multiline(&mut self.editor_text)
+                                    .font(FontId::monospace(14.0))
+                                    .text_color(FG_LIGHT)
+                                    .desired_width(f32::INFINITY)
+                                    .interactive(false)
+                                    .hint_text("Start typing here... Keystroke speeds will be recorded in real-time."),
+                            );
+                        });
                 });
             });
     }
